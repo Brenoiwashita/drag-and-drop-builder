@@ -1,0 +1,123 @@
+<div class="layout">
+    <!-- TOOLBOX: Componentes disponíveis -->
+    <div class="toolbox" cdkDropList [cdkDropListConnectedTo]="['canvas']">
+        <h3>📦 Componentes</h3>
+      
+        <div *ngFor="let group of toolbox" class="toolbox-group">
+          <h4>{{ group.category }}</h4>
+      
+          <div
+            class="tool"
+            *ngFor="let item of group.items"
+            cdkDrag
+            [cdkDragData]="item"
+          >
+            <span class="tool-icon">{{ item.icon }}</span> {{ item.label }}
+          </div>
+        </div>
+      </div>
+
+    <!-- CANVAS: Área de montagem -->
+    <div class="canvas" cdkDropList id="canvas" (cdkDropListDropped)="drop($event)">
+        <h3>Tela</h3>
+        <div class="component" cdkDrag *ngFor="let comp of canvas; let i = index">
+            <!-- Botão de editar -->
+            <button (click)="openModal(i); $event.stopPropagation()" class="edit-btn" title="Editar componente">
+                ✏️
+            </button>
+            <button (click)="removeComponent(i)" class="remove-btn" title="Remover componente">
+                🗑️
+            </button>
+            <ng-container [ngSwitch]="comp.type">
+                <input *ngSwitchCase="'input'" [placeholder]="comp.placeholder" [value]="comp.value" />
+                <textarea *ngSwitchCase="'textarea'" [placeholder]="comp.placeholder">{{ comp.value }}</textarea>
+                <button *ngSwitchCase="'button'">{{ comp.label }}</button>
+                <label *ngSwitchCase="'checkbox'">
+                    <input type="checkbox" /> {{ comp.label }}
+                </label>
+                <header *ngSwitchCase="'header'" class="layout-block">Cabeçalho</header>
+                <footer *ngSwitchCase="'footer'" class="layout-block">Rodapé</footer>
+                <div *ngSwitchCase="'carousel'" class="carousel-preview">
+                    <div *ngFor="let slide of comp.slides" class="carousel-item">
+                        <img [src]="slide.url" />
+                        <p>{{ slide.title }}</p>
+                    </div>
+                </div> <img *ngSwitchCase="'image'" class="form-image"
+                    [src]="comp.value || 'https://vidadeproduto.com.br/wp-content/uploads/2025/02/unnamed-4.png'" />
+            </ng-container>
+
+        </div>
+    </div>
+</div>
+
+<!-- JSON ao final -->
+<!-- <h3>JSON do formulário</h3>
+<pre>{{ canvas | json }}</pre> -->
+
+<!-- Modal -->
+<div class="modal-backdrop" *ngIf="selectedComponent">
+    <div class="modal">
+        <div class="modal-tabs">
+            <button [class.active]="modalTab === 'edit'" (click)="setModalTab('edit')">Editar</button>
+            <button [class.active]="modalTab === 'actions'" (click)="setModalTab('actions')">Ações</button>
+        </div>
+
+        <form (ngSubmit)="saveChanges()">
+            <!-- Aba: Editar -->
+            <div *ngIf="modalTab === 'edit'">
+                <div *ngIf="selectedComponent.type === 'input' || selectedComponent.type === 'textarea'">
+                    <label>Placeholder:</label>
+                    <input [(ngModel)]="selectedComponent.placeholder" name="placeholder" />
+                </div>
+
+                <div
+                    *ngIf="selectedComponent.type === 'button' || selectedComponent.type === 'checkbox' || selectedComponent.type === 'footer'">
+                    <label>Label:</label>
+                    <input [(ngModel)]="selectedComponent.label" name="label" />
+                </div>
+
+                <div *ngIf="selectedComponent.type === 'image'">
+                    <label>URL da imagem:</label>
+                    <input [(ngModel)]="selectedComponent.value" name="imgUrl" />
+                </div>
+
+                <div *ngIf="selectedComponent.type === 'carousel'">
+                    <h4>Slides do Carrossel</h4>
+
+                    <div *ngIf="selectedComponent.slides">
+                        <div *ngFor="let slide of selectedComponent.slides; let i = index" class="carousel-slide">
+                            <label>Imagem URL:</label>
+                            <input [(ngModel)]="slide.url" [name]="'url' + i" />
+
+                            <label>Título:</label>
+                            <input [(ngModel)]="slide.title" [name]="'title' + i" />
+
+                            <button type="button" (click)="selectedComponent?.slides?.splice(i, 1)">Remover</button>
+                            <hr />
+                        </div>
+
+                        <button type="button" (click)="addCarouselSlide()">➕ Adicionar Slide</button>
+                    </div>
+
+                    <button type="button" (click)="addCarouselSlide()">➕ Adicionar Slide</button>
+                </div>
+            </div>
+
+            <!-- Aba: Ações -->
+            <div *ngIf="modalTab === 'actions'">
+                <label>Ação:</label>
+                <select [(ngModel)]="selectedComponent.value" name="action">
+                    <option value="">Nenhuma</option>
+                    <option value="alert">Mostrar Alerta</option>
+                    <option value="log">Logar no console</option>
+                    <option value="desabilitar">Desabilitar campo</option>
+                </select>
+            </div>
+
+            <div class="modal-buttons">
+                <button type="submit">💾 Salvar</button>
+                <button type="button" (click)="closeModal()">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
