@@ -22,7 +22,7 @@
         <h3>Tela</h3>
         <div class="component" cdkDrag *ngFor="let comp of canvas; let i = index">
             <!-- Botão de editar -->
-            <button (click)="openModal(i); $event.stopPropagation()" class="edit-btn" title="Editar componente">
+            <button type="button" cdkDragHandle (click)="openModal(i); $event.stopPropagation()" class="edit-btn" title="Editar componente">
                 ✏️
             </button>
             <button (click)="removeComponent(i)" class="remove-btn" title="Remover componente">
@@ -51,12 +51,15 @@
 </div>
 
 <!-- JSON ao final -->
-<!-- <h3>JSON do formulário</h3>
-<pre>{{ canvas | json }}</pre> -->
+<h3>JSON do formulário</h3>
+<pre>{{ canvas | json }}</pre>
 
 <!-- Modal -->
-<div class="modal-backdrop" *ngIf="selectedComponent">
-    <div class="modal">
+<div class="side-modal-backdrop" *ngIf="selectedComponent">
+    <div class="side-modal">
+        <p style="background: lightyellow; padding: 8px; font-size: 12px;">
+          DEBUG: Modal ativo para tipo "{{ selectedComponent?.type }}"
+        </p>
         <div class="modal-tabs">
             <button [class.active]="modalTab === 'edit'" (click)="setModalTab('edit')">Editar</button>
             <button [class.active]="modalTab === 'actions'" (click)="setModalTab('actions')">Ações</button>
@@ -71,7 +74,7 @@
                 </div>
 
                 <div
-                    *ngIf="selectedComponent.type === 'button' || selectedComponent.type === 'checkbox' || selectedComponent.type === 'footer'">
+                    *ngIf="selectedComponent.type === 'button' || selectedComponent.type === 'checkbox' || selectedComponent.type === 'footer' || selectedComponent.type === 'header'">
                     <label>Label:</label>
                     <input [(ngModel)]="selectedComponent.label" name="label" />
                 </div>
